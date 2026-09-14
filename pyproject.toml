@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "seg2d-toolkit"
-version = "0.1.0"
-description = "Small, tested utilities for 2D semantic segmentation and image preprocessing"
+version = "0.2.0"
+description = "Tested U-Net training, inference, and image preprocessing tools"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["numpy>=1.26,<3", "Pillow>=10.4", "opencv-python-headless>=4.8,<5"]

@@ -13,6 +13,27 @@ def main(argv: list[str] | None = None) -> None:
     sub = parser.add_subparsers(dest="command", required=True)
     demo = sub.add_parser("demo", help="Generate a procedural preprocessing example")
     demo.add_argument("--output-dir", default="runs/demo")
+    toy = sub.add_parser("make-toy-data", help="Generate independent train/val/test shapes")
+    toy.add_argument("--output-dir", default="runs/toy-data")
+    toy.add_argument("--size", type=int, default=64)
+    toy.add_argument("--seed", type=int, default=17)
+    training_demo = sub.add_parser("train-demo", help="Train, test, and visualize a small CPU example")
+    training_demo.add_argument("--output-dir", default="runs/train-demo")
+    training_demo.add_argument("--epochs", type=int, default=15)
+    training = sub.add_parser("train", help="Train U-Net with separate train/ and val/ directories")
+    training.add_argument("data_dir")
+    training.add_argument("output_dir")
+    training.add_argument("--classes", type=int, required=True)
+    training.add_argument("--size", type=int, default=64)
+    training.add_argument("--base-channels", type=int, default=4)
+    training.add_argument("--epochs", type=int, default=15)
+    training.add_argument("--batch-size", type=int, default=8)
+    training.add_argument("--learning-rate", type=float, default=0.003)
+    training.add_argument("--patience", type=int, default=8)
+    training.add_argument("--seed", type=int, default=7)
+    training.add_argument("--device", choices=("cpu", "cuda"), default="cpu")
+    training.add_argument("--threads", type=int, default=1)
+    training.add_argument("--no-augment", action="store_true")
     prep = sub.add_parser("preprocess", help="Process an 8-bit RGB image")
     prep.add_argument("input")
     prep.add_argument("output")
@@ -38,6 +59,24 @@ def main(argv: list[str] | None = None) -> None:
             from .demo import create_demo
 
             print(create_demo(args.output_dir))
+        elif args.command == "make-toy-data":
+            from .toy import create_toy_data
+
+            print(create_toy_data(args.output_dir, size=args.size, seed=args.seed))
+        elif args.command == "train-demo":
+            from .toy import train_demo
+
+            print(json.dumps(train_demo(args.output_dir, args.epochs), indent=2, allow_nan=False))
+        elif args.command == "train":
+            from .training import TrainConfig, train
+
+            config = TrainConfig(
+                num_classes=args.classes, size=args.size, base_channels=args.base_channels,
+                epochs=args.epochs, batch_size=args.batch_size, learning_rate=args.learning_rate,
+                patience=args.patience, seed=args.seed, device=args.device, threads=args.threads,
+                augment=not args.no_augment,
+            )
+            print(json.dumps(train(args.data_dir, args.output_dir, config), indent=2, allow_nan=False))
         elif args.command == "evaluate":
             metric = ConfusionMatrix(args.classes)
             metric.update(load_labels(args.target), load_labels(args.prediction))

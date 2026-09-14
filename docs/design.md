@@ -5,7 +5,11 @@
 Preprocessing, model execution, and metrics are independent. Importing `seg2d` or
 running a preprocessing command does not initialize PyTorch or allocate GPU memory.
 Paths come from command-line arguments; no module scans an external project tree.
-The default inference device is CPU. GPU use must be requested explicitly.
+The default inference and training device is CPU. GPU use must be requested explicitly.
+
+The generic trainer is separate from inference and preprocessing. Its protocol and
+data requirements are documented in [training.md](training.md). It does not import
+or execute an external research training pipeline.
 
 ## Array Contracts
 
@@ -48,6 +52,9 @@ Tests cover known confusion matrices, pixel-pooling equivalence, absent classes,
 gamma identity and direction, histogram identity, direct OpenCV CLAHE equivalence,
 input preservation, CLI validation, reproducible examples, checkpoint round trips,
 finite gradients, non-finite checkpoints/logits, and odd model input sizes.
+Training tests additionally check pairing errors, split overlap, synchronized
+transforms, repeatability, best-checkpoint selection, failure records, and atomic
+checkpoint writes. CI runs a short end-to-end training demo on generated data.
 
 The procedural demo needs no research data and has no scientific interpretation.
 CI is configured for CPU execution; a workflow file alone is not evidence that a

@@ -26,4 +26,6 @@ jobs:
       - name: Unit and inference tests
         run: python -m unittest discover -s tests -v
       - name: CLI smoke test
-        run: python -m seg2d demo --output-dir runs/ci-demo
+        run: |
+          python -m seg2d demo --output-dir runs/ci-demo
+          python -m seg2d train-demo --output-dir runs/ci-training --epochs 2

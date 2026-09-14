@@ -1,22 +1,25 @@
 # 2d-segmentation
 
-A compact Python toolkit for image preprocessing, U-Net inference, and pixel-level
-segmentation evaluation. It packages general-purpose components from an image
+A compact Python toolkit for U-Net training, image preprocessing, inference, and
+pixel-level segmentation evaluation. It packages general-purpose components from an image
 segmentation project into small modules with explicit input contracts and CPU tests.
 
 This is a **code portfolio**, not a pretrained segmentation product or a complete
-research reproduction package. It includes no research dataset, model weights,
-unpublished method, or benchmark results.
+research reproduction package. Only three authorized field example pairs are
+included; the full research dataset, model weights, unpublished methods, and
+paper results are not distributed.
 
 ## Included
 
 | Component | Implementation |
 | --- | --- |
 | Model | Four-level U-Net with batch normalization and nearest-neighbor upsampling |
+| Training | Standard cross-entropy, separate validation transforms, early stopping, finite-state checks |
+| Data | Strict image/mask pairing, label validation, cross-split duplicate-image detection |
 | Preprocessing | LAB-luminance CLAHE, gamma correction, per-channel histogram matching |
 | Inference | Strict state-dict loading, finite-value checks, class-index PNG output |
 | Evaluation | Streaming confusion matrix, IoU, F1, precision, recall, pixel accuracy |
-| Engineering | Installable package, CLI, reproducible procedural example, CPU test workflow |
+| Engineering | Installable package, CLI, generated end-to-end example, CPU tests and CI |
 
 ![Preprocessing example generated from procedural shapes](assets/preprocessing_demo.png)
 
@@ -39,6 +42,48 @@ python -m seg2d demo --output-dir runs/demo
 The preprocessing demo does not require PyTorch, a GPU, a dataset, or a checkpoint.
 Commands refuse to overwrite existing outputs; choose a new output path to rerun.
 The installed `seg2d` entry point is equivalent to `python -m seg2d`.
+
+### Field Examples
+
+For the application context, see [three real seafloor images with supplied annotations](examples/field_samples/README.md).
+They illustrate coral, seagrass, and sea urchin appearance. They are not model
+predictions or a benchmark, and their RGB annotations are not training-ready
+class-index masks. The generated example below does not train on these images.
+
+### Train And Test A Small Example
+
+```bash
+python -m pip install -e '.[model]'
+python -m seg2d train-demo --output-dir runs/train-demo
+```
+
+This command generates 48 training, 12 validation, and 12 test images of colored
+shapes. It trains a small U-Net on CPU, selects the checkpoint using validation
+loss, and only then evaluates the test split. No external dataset or pretrained
+weights are downloaded. Outputs include `training/history.csv`,
+`training/best.pt`, `test_metrics.json`, and `predictions.png`.
+
+![Generated test images, labels, and actual U-Net predictions](assets/training_demo.png)
+
+The preview shows the **first four test images**, not a score-selected subset.
+It comes from the default 15-epoch command (data seed 17, training seed 7).
+These colored shapes are deliberately easy and demonstrate the software workflow,
+not real-world segmentation performance. Weights remain local and are not bundled.
+
+### Train On Your Own Paired Images
+
+Provide separate `train/images`, `train/masks`, `val/images`, and `val/masks`
+directories. Pair images and PNG class-index masks by filename stem. Then run:
+
+```bash
+python -m seg2d train data/my_dataset runs/my_training --classes 3 --size 64 --base-channels 4
+python -m seg2d predict input.png runs/my_training/best.pt runs/prediction.png --classes 3 --size 64 --base-channels 4
+```
+
+Match inference class count, model width, and resize size to your training config.
+The small defaults are intended for development, not as a recommended research
+configuration. Training is FP32; CPU is the default and CUDA requires `--device cuda`.
+See [the training guide](docs/training.md) for data contracts, artifacts, and limitations.
 
 ### Preprocess An Image
 
@@ -108,6 +153,9 @@ report = metric.compute()
 src/seg2d/
   preprocessing.py   Image-only transformations
   model.py           U-Net building blocks and forward pass
+  data.py            Paired datasets and split validation
+  training.py        FP32 training and atomic checkpoint saving
+  toy.py             Generated train/val/test data and training demo
   inference.py       Checkpoint validation and prediction
   metrics.py         Incremental confusion matrix and scores
   images.py          Image and label I/O validation
@@ -116,6 +164,7 @@ src/seg2d/
 tests/               Numerical, I/O, CLI, and model tests
 docs/                Design decisions and scope
 assets/              Procedural README illustration
+examples/            Authorized field images and RGB annotation examples
 .github/workflows/   CPU test configuration
 ```
 
@@ -123,9 +172,10 @@ assets/              Procedural README illustration
 
 The U-Net module is a refactored PyTorch implementation, not a new architecture.
 It supports odd image sizes by aligning decoder tensors to skip-connection sizes.
-This repository does not include training recipes, research-specific augmentation,
-data splits, private files, or performance claims. The tests check software behavior,
-not scientific effectiveness. Model tests require the optional PyTorch dependency.
+This repository includes a generic training example, not the original research
+training recipe. Research-specific augmentation, original data splits, private
+files, and scientific performance claims are excluded. Tests check software
+behavior, not scientific effectiveness. Training and model tests require PyTorch.
 
 - [U-Net, Ronneberger et al.](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/)
 - [OpenCV histogram equalization and CLAHE](https://docs.opencv.org/4.x/d5/daf/tutorial_py_histogram_equalization.html)
