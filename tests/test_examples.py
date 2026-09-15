@@ -80,3 +80,51 @@ class FieldExampleTests(unittest.TestCase):
                 self.assertFalse(bundled.info)
             with self.assertRaises(FileExistsError):
                 PREVIEW.create_preview(output)
+
+    def test_equal_opacity_overlay_preserves_inputs_and_background(self):
+        image = np.full((2, 2, 3), 80, dtype=np.uint8)
+        labels = np.array([[0, 1], [2, 3]], dtype=np.uint8)
+        colored = PREVIEW.paint_prediction(image, labels)
+        original_colored = colored.copy()
+        actual = PREVIEW.overlay_rgb(image, colored)
+        expected = np.rint(0.55 * image.astype(float) + 0.45 * colored.astype(float)).astype(np.uint8)
+        np.testing.assert_array_equal(actual, expected)
+        np.testing.assert_array_equal(actual[0, 0], image[0, 0])
+        np.testing.assert_array_equal(image, np.full_like(image, 80))
+        np.testing.assert_array_equal(colored, original_colored)
+        np.testing.assert_array_equal(PREVIEW.overlay_rgb(image, colored, 0), image)
+        np.testing.assert_array_equal(PREVIEW.overlay_rgb(image, colored, 1), colored)
+
+    def test_overlay_rejects_invalid_parameters(self):
+        image = np.zeros((2, 2, 3), dtype=np.uint8)
+        for alpha in (-0.1, 1.1, float("nan"), float("inf"), True, "0.45"):
+            with self.assertRaises(ValueError):
+                PREVIEW.overlay_rgb(image, image, alpha)
+        with self.assertRaises(ValueError):
+            PREVIEW.overlay_rgb(image, np.zeros((3, 2, 3), dtype=np.uint8))
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaises(ValueError):
+                PREVIEW.create_preview(Path(directory) / "unused.png", view="unknown")
+
+    def test_overlay_and_featured_views_use_original_panels(self):
+        from seg2d.images import load_rgb
+
+        with tempfile.TemporaryDirectory() as directory:
+            for view, height, name in (("overlay", 1208, "inference_overlay.png"), ("featured", 504, "featured_inference.png")):
+                output = Path(directory) / name
+                PREVIEW.create_preview(output, view=view)
+                with Image.open(output) as rendered:
+                    self.assertEqual(rendered.size, (1024, height))
+                    sample = "sample_02.png" if view == "featured" else "sample_01.png"
+                    image = load_rgb(ROOT / "images" / sample)
+                    annotation = load_rgb(ROOT / "annotations" / sample)
+                    predicted = PREVIEW.paint_prediction(image, load_labels(ROOT / "predictions" / sample))
+                    panels = (image, PREVIEW.overlay_rgb(image, annotation), PREVIEW.overlay_rgb(image, predicted))
+                    for column, panel in enumerate(panels):
+                        expected = Image.fromarray(panel).resize((320, 320), Image.Resampling.NEAREST)
+                        actual = rendered.crop((16 + 336 * column, 118, 336 + 336 * column, 438))
+                        np.testing.assert_array_equal(np.asarray(actual), np.asarray(expected))
+                with Image.open(ROOT / name) as bundled:
+                    self.assertEqual(bundled.size, (1024, height))
+                    self.assertFalse(bundled.info)
+                    self.assertFalse(bundled.getexif())

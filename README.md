@@ -11,22 +11,25 @@ model weights, unpublished methods, and research performance tables are not dist
 
 ## Real Seafloor Examples
 
-Three real images from the application dataset, with supplied annotations and
-**actual U-Net predictions**: coral, seagrass, and sea urchin with coral.
+One seagrass example with its supplied annotation and **actual U-Net prediction**.
+This case is highlighted for readability, not as a representative performance result.
 
-![Real seafloor images, supplied annotations, and actual U-Net predictions](examples/field_samples/inference_preview.png)
+![Seagrass image with annotation and actual U-Net prediction at equal overlay opacity](examples/field_samples/featured_inference.png)
 
-Red marks coral, green marks seagrass, and yellow marks sea urchin. The middle
-column is the supplied RGB annotation; the right column is the model's raw
-prediction, displayed in the same colors without smoothing or manual corrections.
-Each image was excluded from its checkpoint's training fold, but belonged to the
-validation set used for checkpoint selection, **not an independent test set**.
-The same three examples were fixed before inference, not selected by prediction quality.
+Annotation and prediction use the same 45% opacity so seabed texture remains
+visible. The foreground regions come from the original annotation and raw
+prediction; no smoothing or manual corrections were applied.
 
-See [the image pairs, prediction masks, and inference notes](examples/field_samples/README.md)
-for details and reuse information. The RGB annotations are not training-ready
-class-index masks. The generated training demo below is separate and does not use
-these images; no field-model weights are bundled.
+**What still fails:** this example has local boundary errors and small false-positive
+regions. The mixed coral/urchin case also shows substantial coral over-segmentation.
+[All three examples, including that difficult case](examples/field_samples/README.md),
+remain available with their original annotations, unmodified prediction masks, and
+inference notes.
+
+The full three-image set was fixed before inference; only the homepage presentation
+was selected afterward. Each image was excluded from its checkpoint's training
+fold but used for validation checkpoint selection, **not independent testing**.
+The generated-shape training demo below is separate; field-model weights are not bundled.
 
 ## Included
 

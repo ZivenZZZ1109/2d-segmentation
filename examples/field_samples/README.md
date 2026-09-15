@@ -5,11 +5,14 @@ included with permission for this repository's demonstration, together with
 qualitative predictions from an existing U-Net baseline. The broader project's
 provenance is described in [NOTICE.md](../../NOTICE.md).
 
-![Images, supplied annotations, and actual U-Net predictions](inference_preview.png)
+![All three images with annotation and prediction overlays at equal opacity](inference_overlay.png)
 
-The **middle column contains supplied RGB annotations**. The **right column
-contains model predictions**, painted over the input for display. The unpainted
-prediction regions represent class 0 (Others), not transparent or ignored predictions.
+The **middle column blends the supplied RGB annotation with the image**. The
+**right column blends the raw prediction colors with the image**. Both use 45%
+opacity to retain visible seabed texture. This changes only the visualization,
+not annotation or prediction geometry. Unpainted prediction regions represent
+class 0 (Others), not ignored predictions. The original
+[solid-color three-column view](inference_preview.png) is retained for inspection.
 
 | Sample | Visible annotated content |
 | --- | --- |
@@ -24,11 +27,26 @@ generic trainer or `evaluate` command. No automatic RGB-to-class conversion is
 provided here because interpreting unpainted and boundary pixels requires an
 explicit annotation policy.
 
+## Visible Failure Modes
+
+- **Sample 01, coral:** the main annotated regions are detected, but several
+  predicted boundaries and extents differ from the supplied annotation.
+- **Sample 02, seagrass:** much of the main region is recovered, with local boundary
+  errors and small false-positive regions. It is the homepage's featured example.
+- **Sample 03, coral and sea urchin:** the prediction overextends the coral region
+  substantially, illustrating a limitation of this baseline in a mixed scene.
+
+These are qualitative observations relative to the supplied annotations, not a
+performance ranking. All three original cases and raw predictions are retained.
+
 ## Inference And Selection
 
 The pairs were selected for visible annotated objects and little blank border and
 published before any predictions were generated. All three were retained without
 selection by model performance. They are not random or representative samples.
+After reviewing these predictions, sample 02 was highlighted on the homepage for
+readability. That presentation choice does not change the full set or establish
+typical model performance.
 
 Predictions were generated with this repository's `seg2d.inference` module and
 existing baseline checkpoints: four classes, base width 64, training seed 42.
@@ -57,11 +75,19 @@ Weights and the full dataset are not distributed, so the field predictions canno
 be independently regenerated from this repository alone. The generated-shape
 example remains the self-contained end-to-end training demonstration.
 
-To reconstruct the three-column visualization from the bundled prediction PNGs:
+To reconstruct the full overlay gallery, featured case, or original solid-color
+view from the bundled prediction PNGs:
 
 ```bash
+python examples/field_samples/make_inference_preview.py --view overlay --output runs/field-inference-overlay.png
+python examples/field_samples/make_inference_preview.py --view featured --output runs/field-inference-featured.png
 python examples/field_samples/make_inference_preview.py --output runs/field-inference-preview.png
 ```
+
+The renderer blends the supplied RGB annotation directly for display. It does
+not infer training labels from annotation colors. Both display columns use
+`round(0.55 * image + 0.45 * colored_view)`; prediction colors come directly from
+the unchanged class-index PNGs.
 
 To run inference with your own compatible four-class checkpoint:
 
