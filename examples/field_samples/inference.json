@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "architecture": "U-Net",
+  "base_channels": 64,
+  "num_classes": 4,
+  "classes": {
+    "0": "Others",
+    "1": "Coral",
+    "2": "Seagrass",
+    "3": "Sea urchin"
+  },
+  "training_seed": 42,
+  "checkpoint_selection": "lowest monitoring validation loss in the corresponding fold",
+  "sample_selection": "same three images already published before inference; not selected by prediction quality",
+  "evaluation_scope": "within-survey validation images excluded from their checkpoint's training partition; not an independent test set or spatial holdout",
+  "inference": {
+    "device": "cpu",
+    "precision": "float32",
+    "size": [
+      512,
+      512
+    ],
+    "normalization": "RGB / 255",
+    "test_time_augmentation": false,
+    "postprocessing": "none; per-pixel argmax",
+    "torch_version": "2.9.1+cu128"
+  },
+  "samples": [
+    {
+      "sample": "sample_01",
+      "validation_fold": 3,
+      "image_sha256": "78ef72fbc7c4cbf8468176b6af8a445e1024baf8d191dd68063a0dde42905f7b",
+      "prediction_sha256": "9ffe84a1b8361cc84f8fdecda33ce1ef145a845af9c7abebf4ee9ff49822da8b",
+      "checkpoint_sha256": "3a58b318d81d4c5785ae4487c6098fe733bcbeb64fd7f8b7b3f4178b46a8ec53"
+    },
+    {
+      "sample": "sample_02",
+      "validation_fold": 3,
+      "image_sha256": "aa158bc4724fe2bd4e9f078df08b3febae2d25c6e5d93b577079065a6988242a",
+      "prediction_sha256": "5215fb19876c7a40bfc92dff556d9d85d8d884bd516d30b74a8352728dbe6a8b",
+      "checkpoint_sha256": "3a58b318d81d4c5785ae4487c6098fe733bcbeb64fd7f8b7b3f4178b46a8ec53"
+    },
+    {
+      "sample": "sample_03",
+      "validation_fold": 1,
+      "image_sha256": "4fe70b31b85e0230609836ff6d26be5c9c4ecafa7f2d66516ffa7e9601aea933",
+      "prediction_sha256": "33e000cce6c3576fbbad0aa2522310c114b3b6f6c8ef54af6396926be1dc5061",
+      "checkpoint_sha256": "96528a8dd037e747a2afcef2848f828e315711083ab85453eb5a4735a96af1e2"
+    }
+  ]
+}

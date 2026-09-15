@@ -9,8 +9,9 @@ implementation credited to ycu-iil (2021), associated with
 [Terayama et al., DOI: 10.1111/2041-210X.13744](https://doi.org/10.1111/2041-210X.13744).
 Its upstream MIT notice is retained in `licenses/UPSTREAM_MIT.txt`. The upstream
 source, full datasets, and pretrained weights are not bundled. Three authorized
-field image/annotation pairs are provided separately under `examples/field_samples/`;
-the upstream software license does not apply to those images.
+field image/annotation pairs and their qualitative baseline predictions are
+provided separately under `examples/field_samples/`; the upstream software license
+does not apply to those images.
 
 The retained upstream license applies to the relevant upstream material; it does
 not by itself establish a blanket license for every new file in this repository.

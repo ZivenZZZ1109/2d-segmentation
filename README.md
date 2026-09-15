@@ -6,21 +6,27 @@ segmentation project into small modules with explicit input contracts and CPU te
 
 This is a **code portfolio**, not a pretrained segmentation product or a complete
 research reproduction package. Only three authorized field example pairs are
-included; the full research dataset, model weights, unpublished methods, and
-paper results are not distributed.
+included, with a qualitative baseline inference preview. The full research dataset,
+model weights, unpublished methods, and research performance tables are not distributed.
 
 ## Real Seafloor Examples
 
-Three real images from the application dataset, paired with their supplied color
-annotations: coral, seagrass, and sea urchin with coral.
+Three real images from the application dataset, with supplied annotations and
+**actual U-Net predictions**: coral, seagrass, and sea urchin with coral.
 
-![Real seafloor images and their supplied color annotations, not model predictions](examples/field_samples/preview.png)
+![Real seafloor images, supplied annotations, and actual U-Net predictions](examples/field_samples/inference_preview.png)
 
-Red marks coral, green marks seagrass, and yellow marks sea urchin. These are
-**annotation visualizations, not model predictions or training-ready class-index
-masks**. The generated training demo below is separate and does not use these images.
-See [the original image pairs and annotation notes](examples/field_samples/README.md)
-for the full-resolution files, selection details, and reuse information.
+Red marks coral, green marks seagrass, and yellow marks sea urchin. The middle
+column is the supplied RGB annotation; the right column is the model's raw
+prediction, displayed in the same colors without smoothing or manual corrections.
+Each image was excluded from its checkpoint's training fold, but belonged to the
+validation set used for checkpoint selection, **not an independent test set**.
+The same three examples were fixed before inference, not selected by prediction quality.
+
+See [the image pairs, prediction masks, and inference notes](examples/field_samples/README.md)
+for details and reuse information. The RGB annotations are not training-ready
+class-index masks. The generated training demo below is separate and does not use
+these images; no field-model weights are bundled.
 
 ## Included
 
@@ -170,7 +176,7 @@ src/seg2d/
 tests/               Numerical, I/O, CLI, and model tests
 docs/                Design decisions and scope
 assets/              Procedural README illustration
-examples/            Authorized field images and RGB annotation examples
+examples/            Authorized field images, annotations, and qualitative predictions
 .github/workflows/   CPU test configuration
 ```
 
@@ -180,7 +186,7 @@ The U-Net module is a refactored PyTorch implementation, not a new architecture.
 It supports odd image sizes by aligning decoder tensors to skip-connection sizes.
 This repository includes a generic training example, not the original research
 training recipe. Research-specific augmentation, original data splits, private
-files, and scientific performance claims are excluded. Tests check software
+files, and benchmark performance claims are excluded. Tests check software
 behavior, not scientific effectiveness. Training and model tests require PyTorch.
 
 - [U-Net, Ronneberger et al.](https://lmb.informatik.uni-freiburg.de/people/ronneber/u-net/)
